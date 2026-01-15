@@ -1,18 +1,26 @@
 import Login from "./components/Login";
-import CreateEvent from "./components/CreateEvent";
-import EventList from "./components/EventList";
-import TicketBooking from "./components/TicketBooking";
-import Dashboard from "./components/Dashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import UserDashboard from "./components/UserDashboard";
+
 function App() {
-  return (
-    <>
-     <Login />
-     <CreateEvent />
-      <EventList />
-      <TicketBooking />
-      <Dashboard />
-    </>
-  );
+  const role = localStorage.getItem("role");
+
+  // If not logged in
+  if (!role) {
+    return <Login />;
+  }
+
+  // If admin
+  if (role === "admin") {
+    return <AdminDashboard />;
+  }
+
+  // If user
+  if (role === "user") {
+    return <UserDashboard />;
+  }
+
+  return <Login />;
 }
 
 export default App;

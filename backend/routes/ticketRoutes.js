@@ -10,8 +10,8 @@ const web3 = new Web3("http://127.0.0.1:7545");
 const contractJson = require("../scripts/build/EventTicket.json");
 const ABI = contractJson.abi;
 
-const CONTRACT_ADDRESS = "0x88090521fEAEf86A990E2744d7Fd225011B03325";
-const ACCOUNT = "0x530671f12b7BDa4c5ff35d1E5072bE1711d0356e";
+const CONTRACT_ADDRESS = "0x578946b778666C0Ac742D8F9f8124A40965F94Cc";
+const ACCOUNT = "0xd245016dfEc083B304976075B019F6a40bE227cb";
 
 const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
 
