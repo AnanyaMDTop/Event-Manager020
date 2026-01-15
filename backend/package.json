@@ -8,5 +8,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^8.21.0",
+    "qrcode": "^1.5.4",
+    "solc": "^0.8.33",
+    "web3": "^1.10.0"
+  }
 }

@@ -7,41 +7,65 @@ const generateQR = require("../utils/qr");
 const router = express.Router();
 const web3 = new Web3("http://127.0.0.1:7545");
 
-const ABI = [ /* PASTE ABI */ ];
-const ADDRESS = "CONTRACT_ADDRESS";
-const ACCOUNT = "GANACHE_ACCOUNT";
+const contractJson = require("../scripts/build/EventTicket.json");
+const ABI = contractJson.abi;
 
-const contract = new web3.eth.Contract(ABI, ADDRESS);
+const CONTRACT_ADDRESS = "0x88090521fEAEf86A990E2744d7Fd225011B03325";
+const ACCOUNT = "0x530671f12b7BDa4c5ff35d1E5072bE1711d0356e";
 
+const contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+
+/**
+ * BOOK TICKET (Blockchain + DB)
+ */
 router.post("/book", async (req, res) => {
-  const hash = crypto.randomBytes(16).toString("hex");
+  try {
+    const { eventName, userAddress } = req.body;
 
-  await contract.methods.addTicket(hash)
-    .send({ from: ACCOUNT, gas: 300000 });
+    const ticketHash = crypto.randomBytes(16).toString("hex");
 
-  const qr = await generateQR(hash);
+    await contract.methods
+      .createTicket(ticketHash, eventName, userAddress)
+      .send({ from: ACCOUNT, gas: 300000 });
 
-  const ticket = await Ticket.create({
-    ...req.body,
-    ticketHash: hash,
-    qrCode: qr
-  });
+    const qr = await generateQR(ticketHash);
 
-  res.json(ticket);
+    const ticket = await Ticket.create({
+      eventName,
+      userAddress,
+      ticketHash,
+      qrCode: qr,
+      checkedIn: false
+    });
+
+    res.json(ticket);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+/**
+ * VERIFY TICKET (BLOCKCHAIN FIRST)
+ */
 router.post("/verify", async (req, res) => {
-  const valid = await contract.methods
-    .verifyTicket(req.body.ticketHash).call();
+  try {
+    const { ticketHash } = req.body;
 
-  if (!valid) return res.json({ success: false });
+    const verified = await contract.methods
+      .verifyTicket(ticketHash)
+      .send({ from: ACCOUNT, gas: 200000 });
 
-  await Ticket.updateOne(
-    { ticketHash: req.body.ticketHash },
-    { checkedIn: true }
-  );
+    await Ticket.updateOne(
+      { ticketHash },
+      { checkedIn: true }
+    );
 
-  res.json({ success: true });
+    res.json({ success: true });
+
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
 });
 
 module.exports = router;
